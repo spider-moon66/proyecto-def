@@ -83,15 +83,9 @@ void Receta::serializar(std::ofstream& archivo, const char& delim)
     
     archivo << descripcion << delim;
 
-    /*Aqui escribo la ultima posicion de la lista de ingredientes, asi puedo utilizar ese valor para reconstruir 
-    la lista por medio de una iteración sin depender de los delimitadores*/
-
     Lista<Ingrediente>::Position pos(ingredientesData.getFirst());
 
-    while(pos != nullptr){
-        ingredientesData.retrieve(pos).serializar(archivo, '|');
-        archivo << ';';
-    }
+    ingredientesData.serialize(archivo, '#');
 
     archivo << std::to_string(this->instrucciones.getLastPos() + 1) << delim;
 

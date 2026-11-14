@@ -370,7 +370,15 @@ void Lista<T>::deserialize(const std::string& str, const char& delim){
 
     cantINT = std::stoi(cantSTR);
 
-    
+    int i = 0;
+
+    while(i < cantINT){
+        //El nuevo objeto se construye por medio de la cadena que recibe su propio método para deserializar, después se inserta en la lista
+        T nuevo;
+        nuevo.deserialize(myStr, delim);
+        this->ins(nuevo);
+        i++;
+    }
 
 }
 
