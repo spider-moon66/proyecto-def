@@ -87,8 +87,6 @@ void Receta::serializar(std::ofstream& archivo, const char& delim)
 
     ingredientesData.serialize(archivo, '#');
 
-    archivo << std::to_string(this->instrucciones.getLastPos() + 1) << delim;
-
     for(int i = 0; i <= instrucciones.getLastPos(); i++){
         archivo << instrucciones.retrieve(i) << '#';
     }

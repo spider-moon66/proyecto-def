@@ -70,8 +70,8 @@ class Lista{
 
         void anular();
 
-        void serialize(std::ofstream&, const char& ';');
-        void deserialize(const std::string&, const char&);
+        void serialize(std::ofstream&, const char& '#');
+        void deserialize(const std::string&, const char& '#');
 };
 
 //Implementación de Node
@@ -337,6 +337,10 @@ void Lista<T>::serialize(std::ofstream& archivo, const char& delim){
         throw Exception ("No se pudo abrir el archivo");
     }
 
+    if(isEmpty()){return;}
+
+    Node* aux(anchor);
+
     /*Me ayuda a que el algoritmo tenga un criterio más fuerte que el delimitador, 
     declarando explicitamente cuántos elementos tiene que reconstruir*/
     int i = 0;
@@ -347,8 +351,6 @@ void Lista<T>::serialize(std::ofstream& archivo, const char& delim){
     }
 
     archivo << std::to_string(i);
-
-    Node* aux(anchor);
 
     while(aux != nullptr){
         aux->getData().serialize(archivo, '|');

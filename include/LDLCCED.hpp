@@ -89,6 +89,9 @@ class LDLCCED{
         std::string toString();
 
         void anular();
+
+        void serialize(std::ofstream&, const char& '#');
+        void deserialize(const std::string&, const char& '#');
 };
 
 //Node
@@ -476,6 +479,62 @@ std::string LDLCCED<T>::toString(){
     }
 
     return resultado;
+}
+
+template<class T>
+void LDLCCED<T>::serialize(std::ofstream& archivo, const char& delim){
+
+    if(archivo.fail()){
+        throw Exception ("No se pudo abrir el archivo");
+    }
+
+    /*Me ayuda a que el algoritmo tenga un criterio más fuerte que el delimitador, 
+    declarando explicitamente cuántos elementos tiene que reconstruir*/
+    int i = 0;
+
+    Node* aux(header->getNextNode())
+
+    while(aux != header){
+        i++;
+        aux = aux->getNextNode();
+    }
+
+    archivo << std::to_string(i);
+
+    while(aux != header){
+        aux->getData().serialize(archivo, '|');
+        aux = aux->getNextNode();
+    }
+
+}
+
+template<class T>
+void LDLCCED<T>::deserialize(const std::string& str, const char& delim){
+    
+    std::stringstream myStr(str);
+    std::string cantSTR;
+    int cantINT;
+
+    std::getline(myStr, cantSTR, delim);
+
+    cantINT = std::stoi(cantSTR);
+
+    int i = 0;
+
+    while(i < cantINT){
+        //El nuevo objeto se construye por medio de la cadena que recibe su propio método para deserializar, después se inserta en la lista
+        T nuevo;
+
+        nuevo.deserialize(myStr, delim);
+
+        if(this->isEmpty()){
+            this->insInicio(nuevo);
+        }else{
+            this->insFinal(nuevo);
+        }
+        i++;
+    }
+
 }
 
 
