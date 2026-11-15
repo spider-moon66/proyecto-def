@@ -72,7 +72,7 @@ bool Receta::operator<(const Receta& other) const
     return this->getNombre() < other.getNombre();
 }
 
-void Receta::serializar(std::ofstream& archivo, const char& delim)
+void Receta::serialize(std::ofstream& archivo, const char& delim)
 {
 
     if(archivo.fail()){
@@ -83,60 +83,26 @@ void Receta::serializar(std::ofstream& archivo, const char& delim)
     
     archivo << descripcion << delim;
 
-    Lista<Ingrediente>::Position pos(ingredientesData.getFirst());
+    ingredientesData.serialize(archivo, '|');
 
-    ingredientesData.serialize(archivo, '#');
-
-    for(int i = 0; i <= instrucciones.getLastPos(); i++){
-        archivo << instrucciones.retrieve(i) << '#';
-    }
+    instrucciones.serialize(archivo, '#');
     
     archivo << delim;
 
 }
 
-void Receta::deserializar(const std::string& str, const char& delim)
+void Receta::deserialize(const std::string& str, const char& delim)
 {
     std::stringstream myStr(str);
+    std::string nombre;
+    std::string desc;
 
-    /*Aqui lo que estoy haciendo es un tanto rudimentario, mi solución es fragil a modificaciones externas.
-    En las iteraciones paso la cadena completa, sin tokenizar, que se obtiene en cada iteración como parametro al metodo para deserializar 
-    de un objeto temporal de tipo ingrediente/instrucción, deserializar ya modifica o le da valores al objeto que le llamó porque estoy utilizando el operador ->
-    por lo tanto solo hace falta que pase como parametro ese objeto al metodo agregar de la lista y ya estaria reconstruyendo los ingredientes de la lista*/
+    std::getline(myStr, nombre, delim);
 
-    std::string ingredientesStr;
-    std::string instruccionesStr;
-    std::string cantidadIng;
-    std::string cantidadInsStr;
-    int cantIng;
-    int cantIns;
+    std::getline(myStr, desc, delim);
 
-    Ingrediente ingredienteDeSerial;
-
-    getline(myStr, this->nombreReceta, delim);
-    getline(myStr, this->descripcion, delim);
-    //Toma la ultima posición de la lista a reconstruir
-    getline(myStr, cantidadIng, delim);
-    cantIng = std::stoi(cantidadIng);
-    int i = 0;
-    while(i < cantIng){
-
-        std::getline(myStr, ingredientesStr, ';');
-
-        ingredienteDeSerial.deserializar(ingredientesStr, '|');
-        this->ingredientesData.agregar(ingredienteDeSerial);
-        i++;
-    }
-    
-    std::getline(myStr, cantidadInsStr, delim);
-    cantIns = std::stoi(cantidadInsStr);
-
-    i = 0;
-    while(i < cantIns){
-        std::getline(myStr, instruccionesStr, '#');
-        this->instrucciones.agregar(instruccionesStr);
-        i++;
-    }
+    ingredientesData.deserialize(str, '|');
+    instrucciones.deserialize(str, '#');
 
 }
 
@@ -158,11 +124,11 @@ predicado(t),
 n_ins(num)
 {}
 
-short int Receta::Instruccion::getNum(){
+short int Receta::Instruccion::getNum() const{
     return n_ins;
 }
 
-std::string Receta::Instruccion::getPredicado(){
+std::string Receta::Instruccion::getPredicado() const{
     return predicado;
 }
 
@@ -176,4 +142,42 @@ void Receta::Instruccion::setPredicado(const std::string& t){
 
 std::string Receta::Instruccion::toString(){
     return std::to_string(n_ins) + ". " + predicado + "/n";
+}
+
+/*Se manda llamar solo cuando se inserta un elemento, 
+contemplando que la lista de instrucciones sólo admite inserción ordenada para simplificar las operaciones desde la interfaz*/
+short int Receta::autoNum(){
+    return contadorINS++;
+}
+
+/*Se invoca cuando se elimina un elemento, 
+en tal caso tiene que decrementar el contador y además tiene que cambiar el numero de instruccion de las instrucciones consecutivas*/
+void Receta::autoDecr(LDLCCED<Instruccion>::Position pos){
+    //El peor caso es que se elimine la primer instruccion
+    pos = pos->getNextNode();
+
+    while(pos != instrucciones.getLast()->getNextNode()){
+        pos->getData().setNum(pos->getData().getNum() - 1);
+        pos = pos->getNextNode();
+    }
+    contadorINS--;
+}
+
+void Receta::Instruccion::serialize(std::ofstream& archivo, const char& delim){
+    if(archivo.fail()){
+        throw std::runtime_error("Error al intentar abrir el archivo");
+    }
+
+    archivo << std::to_string(n_ins) << delim;
+    archivo << predicado << delim;
+}
+
+void Receta::Instruccion::deserialize(const std::string& str, const char& delim){
+    std::stringstream myStr(str);
+    std::string insSTR;
+
+    std::getline(myStr, insSTR, delim);
+    this->n_ins = std::stoi(insSTR);
+
+    std:getline(myStr, this->predicado, delim);
 }

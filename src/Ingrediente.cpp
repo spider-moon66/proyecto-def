@@ -78,7 +78,7 @@ void Ingrediente::serializar(std::ofstream& archivo, const char delim)
 {
     archivo << this->nombreIngrediente << delim;
     archivo << this->cantidad << delim;
-    archivo << this->unidad;
+    archivo << this->unidad << delim;
 }
 
 void Ingrediente::deserializar(const std::string& str, const char delim)

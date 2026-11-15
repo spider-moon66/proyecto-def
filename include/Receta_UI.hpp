@@ -9,6 +9,8 @@
 #include "Ingredientes_UI.hpp"
 
 class Receta_UI{
+    private:
+    void verInst(Receta&);
     public:
     bool validarReceta(LDLCCED <Receta>&, Receta&);
     void modificarInstrucciones(Receta&);
@@ -23,8 +25,8 @@ class Receta_UI{
     //void ordenarReceta(LDLCCED <Receta>&);
     void verLista(LDLCCED <Receta>&);
     void control(LDLCCED <Receta>&, UI_Ingredientes&);
-    //void guardar(LDLCCED <Receta>&);
-    //void cargar(LDLCCED <Receta>&);
+    void guardar(LDLCCED <Receta>&);
+    void cargar(LDLCCED <Receta>&);
 };
 
 #endif // __RECETA_UI_H__

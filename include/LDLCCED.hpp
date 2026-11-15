@@ -502,7 +502,7 @@ void LDLCCED<T>::serialize(std::ofstream& archivo, const char& delim){
     archivo << std::to_string(i);
 
     while(aux != header){
-        aux->getData().serialize(archivo, '|');
+        aux->getData().serialize(archivo, delim);
         aux = aux->getNextNode();
     }
 

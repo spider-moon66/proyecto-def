@@ -8,12 +8,12 @@
 #include "LDSL.hpp"
 #include "Ingrediente.hpp"
 
-class Receta{
-    private:
-        Lista <Ingrediente> ingredientesData;
-        std::string nombreReceta;
-        std::string descripcion;
 
+class Receta{
+    public:
+        //Dos funciones que me permiten mantener simples las operaciones sobre instrucciones
+        //Enumerar de forma automatica cada instrucción segun el orden de inserción
+        short int autoNum();
         class Instruccion{
             private:
                 short int n_ins = 0;
@@ -21,13 +21,20 @@ class Receta{
             public:
                 Instruccion();
                 Instruccion(const std::string&, const short int);
-                std::string getPredicado();
-                short int getNum();
+                std::string getPredicado() const;
+                short int getNum() const;
                 void setPredicado(const std::string&);
                 void setNum(const short int);
                 std::string toString();
-        };
-
+                void serialize(std::ofstream&, const char& delim = ';');
+                void deserialize(const std::string& str, const char& delim = ';');
+            };
+    private:
+        Lista <Ingrediente> ingredientesData;
+        std::string nombreReceta;
+        std::string descripcion;
+        
+        short int contadorINS = 0;
         LDLCCED<Instruccion> instrucciones;
 
     public:
@@ -46,14 +53,17 @@ class Receta{
         //Asi el menu de ingredientes puede operar sobre la lista de ingredientes cuando sea llamado desde el menu de recetas
         Lista <Ingrediente>& accesoIngredientes();
         LDLCCED<Instruccion>& accesoInstrucciones();
+        //Decrementar de forma automatica cada instrucción
+        void autoDecr(LDLCCED<Instruccion>::Position);
+
         bool operator==(const Receta&) const;
         bool operator>(const Receta&) const;
         bool operator<(const Receta&) const;
         bool operator<=(const Receta&) const;
         bool operator>=(const Receta&) const;
         //Serializar/Deserializar
-        void serializar(std::ofstream&, const char& delim = '*');
-        void deserializar(const std::string& str, const char& delim = '*');
+        void serialize(std::ofstream&, const char& delim = '*');
+        void deserialize(const std::string& str, const char& delim = '*');
 };
 
 #endif // __RECETA_H__

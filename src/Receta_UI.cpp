@@ -10,6 +10,15 @@ void Receta_UI::limpiarBuffer(){
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+void Receta_UI::verInst(Receta& receta){
+    LDLCCED<Receta::Instruccion>::Position pos(receta.accesoInstrucciones().getFirst());
+
+    while(pos->getNextNode() != receta.accesoInstrucciones().getLast()->getNextNode()){
+        std::cout << receta.accesoInstrucciones().retrieve(pos).toString() << "\n\n";
+        pos = pos->getNextNode();
+    }
+}
+
 //Para confirmar que no existan recetas con el mismo nombre y la misma descripcion
 //Podria existir una receta con el mismo nombre pero que sea una variación y eso se notaría en la desc.
 bool Receta_UI::validarReceta(LDLCCED <Receta>& lista, Receta& nueva)
@@ -32,80 +41,126 @@ void Receta_UI::modificarInstrucciones(Receta& receta)
     char op;
     std::cout << "Seleccione una acción" << std::endl;
     std::cout << "[V]er lista de instrucciones" << std::endl;
-    std::cout << "[M]odificar instrucción" << std::endl;
+    std::cout << "[E]ditar instrucción" << std::endl;
     std::cout << "[B]orrar instrucción" << std::endl;
     std::cout << "[A]gregar instrucción" << std::endl;
     std::cout << "[R]egresar" << std::endl;
     do{
         std::cin >> op;
         op = toupper(op);
-        if(op != 'A' && op != 'B' && op != 'M' && op != 'V' && op != 'R'){
+        if(op != 'A' && op != 'B' && op != 'E' && op != 'V' && op != 'R'){
             std::cout << "Seleccione una acción valida (M, B, A, R, V)" << std::endl;
         }
-    }while(op != 'A' && op != 'B' && op != 'M' && op != 'R' && op != 'V');
+    }while(op != 'A' && op != 'B' && op != 'E' && op != 'R' && op != 'V');
     
     switch(op){
         case 'V':
         {
-            for(int i = 0; i <= receta.accesoInstrucciones().getLastPos(); i++){
-                std::cout << i + 1 << " " << receta.accesoInstrucciones().retrieve(i) << "\n\n";
-            }
+            verInst(receta);
             break;
         }
         case 'M':{
-            int ins;
+            if(receta.accesoInstrucciones().isEmpty()){
+                std::cout << "No hay elementos para modificar" << std::endl;
+                return;
+            }
+
+            short int ins;
             std::string texto_nuevo;
 
             std::cout << "Estas son las instrucciones: " << std::endl;
-
-            for(int i = 0; i <= receta.accesoInstrucciones().getLastPos(); i++){
-                std::cout << i + 1 << " " << receta.accesoInstrucciones().retrieve(i) << "\n\n";
-            }
+            verInst(receta);
 
             std::cout << "¿Qué instrucción desea modificar?" << std::endl;
             std::cin >> ins;
-            ins -= 1;
-            if(ins > receta.accesoInstrucciones().getLastPos() || ins == -1){break;}
             limpiarBuffer();
+
+            //Para que no sea una tortura visual
+            short int lastINT = receta.accesoInstrucciones().getLast()->getData().getNum();
+            short int firstINT =  receta.accesoInstrucciones().getFirst()->getData().getNum();
+
+
+            if(ins > lastINT || ins < firstINT){std::cout << "Posición invalida" << std::endl; break;}
+            
+ 
             std::cout << "Escriba la instrucción modificada: " << std::endl;
             std::getline(std::cin, texto_nuevo);
-            receta.accesoInstrucciones().retrieve(ins) = texto_nuevo;
+
+            auto cmp = [ins](const Receta::Instruccion& a){
+                return a.getNum() == ins;
+            };
+            
+            LDLCCED<Receta::Instruccion>::Position pos(receta.accesoInstrucciones().findLineal(cmp));
+            
+            receta.accesoInstrucciones().retrieve(pos).setPredicado(texto_nuevo);
             std::cout << "Receta modificada correctamente" << std::endl;
+
             break;
         }
         case 'B':{
+            if(receta.accesoInstrucciones().isEmpty()){
+                std::cout << "No hay elementos para borrar" << std::endl;
+                return;
+            }
+
             int ins;
 
             std::cout << "Estas son las instrucciones: " << std::endl;
             
-            for(int i = 0; i <= receta.accesoInstrucciones().getLastPos(); i++){
-                std::cout << i + 1 << ". " << receta.accesoInstrucciones().retrieve(i) << "\n";
-            }
-            std::cout << "\n";
+            verInst(receta);
+
             std::cout << "Qué instrucción que desea borrar" << std::endl;
             std::cin >> ins;
-            ins -= 1;
+            limpiarBuffer();
 
-            if(!(receta.accesoInstrucciones().del(ins)) || ins == -1){
-                std::cout << "La instrucción no existe" << std::endl;
-            }else{
-                std::cout << "Eliminada correctamente" << std::endl;
-            }
+            short int lastINT = receta.accesoInstrucciones().getLast()->getData().getNum();
+            short int firstINT =  receta.accesoInstrucciones().getFirst()->getData().getNum();
+
+
+            if(ins > lastINT || ins < firstINT){std::cout << "Posición invalida" << std::endl; break;}
+
+            auto cmp = [ins](const Receta::Instruccion& a){
+                return a.getNum() == ins;
+            };
+            
+            LDLCCED<Receta::Instruccion>::Position pos(receta.accesoInstrucciones().findLineal(cmp));
+
+            receta.autoDecr(pos);
+
+            receta.accesoInstrucciones().del(pos);
+            
             break;
         }
         case 'A':{
             std::string texto_nuevo;
 
-            std::cout << "Estas son las instrucciones: " << std::endl;
-            
-            for(int i = 0; i <= receta.accesoInstrucciones().getLastPos(); i++){
-                std::cout << i + 1 << " " << receta.accesoInstrucciones().retrieve(i) << "\n\n";
+            if(receta.accesoInstrucciones().isEmpty()){
+                std::cout << "Aun no hay instrucciones, comience agregando una instruccion" << std::endl;
+                std::cout << "Escriba la instrucción que desea agregar" << std::endl;
+
+                std::getline(std::cin, texto_nuevo);
+
+                Receta::Instruccion nuevo(texto_nuevo, receta.autoNum());
+
+                receta.accesoInstrucciones().insInicio(nuevo);
+                std::cout << "Instrucción añadida correctamente" << std::endl;
+
+                return;
             }
+
+
+            std::cout << "Estas son las instrucciones: " << std::endl;
+            verInst(receta);
 
             std::cout << "Escriba la instrucción que desea agregar" << std::endl;
             std::getline(std::cin, texto_nuevo);
-            receta.accesoInstrucciones().agregar(texto_nuevo);
-            std::cout << "Receta modificada correctamente" << std::endl;
+
+            Receta::Instruccion nuevo(texto_nuevo, receta.autoNum());
+
+            receta.accesoInstrucciones().insSorted(nuevo);
+
+            std::cout << "Instrucción añadida correctamente" << std::endl;
+
             break;
         }
         case 'R':{
@@ -120,7 +175,6 @@ void Receta_UI::nuevaReceta(LDLCCED <Receta>& lista, UI_Ingredientes& sub)
 {
     std::string nombre;
     std::string desc;
-    std::string instrucciones;
 
     std::cout << "Ingrese el nombre de la receta: " << std::endl;
     std::getline(std::cin, nombre);
@@ -147,21 +201,21 @@ void Receta_UI::nuevaReceta(LDLCCED <Receta>& lista, UI_Ingredientes& sub)
         }while(op != 'N');
 
         int i = 0;
+        std::string pred;
+
         std::cout << "Agregue las instrucciones: " << std::endl;
         do{
             std::cout << "Escriba la instruccion " << i + 1 << std::endl;
-            std::getline(std::cin, instrucciones);
-            nueva.accesoInstrucciones().agregar(instrucciones);
+            std::getline(std::cin, pred);
+
+            Receta::Instruccion nuevaIns(pred, nueva.autoNum());
+
+            nueva.accesoInstrucciones().insFinal(nuevaIns);
             i++;
-            if(nueva.accesoInstrucciones().isFull())
-            {
-                std::cout << "Ha excedido el limite de instrucciones" << std::endl;
-            }else{
-                std::cout << "Agregado \n" << "¿Agregar más instrucciones?: " << "Y/N" << std::endl;
-                std::cin >> op;
-                limpiarBuffer();
-                op = std::toupper(op);
-            }
+            std::cout << "Agregado \n" << "¿Agregar más instrucciones?: " << "Y/N" << std::endl;
+            std::cin >> op;
+            limpiarBuffer();
+            op = std::toupper(op);
         }while(op != 'N');
 
         lista.insFinal(nueva);
@@ -266,14 +320,10 @@ typename LDLCCED<Receta>::Position Receta_UI::buscarReceta(LDLCCED <Receta>& lis
 
 void Receta_UI::verReceta(LDLCCED <Receta>& lista, UI_Ingredientes& sub, LDLCCED<Receta>::Position pos)
 {
-
+    std::cout << std::string(40, '-') << std::endl;
     std::cout << lista.retrieve(pos).toString();
     std::cout << std::endl;
     sub.verIngredientes(lista.retrieve(pos).accesoIngredientes());
-    std::cout << std::string(40, '-') << std::endl;
-    for(int i = 0; i <= lista.retrieve(pos).accesoInstrucciones().getLastPos(); i++){
-        std::cout << "Paso: " << i + 1 << ". " << lista.retrieve(pos).accesoInstrucciones().retrieve(i) << std::endl;
-    }
     std::cout << std::string(40, '-') << std::endl;
 }
 
@@ -373,7 +423,7 @@ void Receta_UI::control(LDLCCED <Receta>& lista, UI_Ingredientes& sub)
     }while(op != 'R');
 }
 
-/*void Receta_UI::guardar(LDLCCED <Receta>& lista)
+void Receta_UI::guardar(LDLCCED <Receta>& lista)
 {
     std::ofstream archivo;
 
@@ -383,7 +433,7 @@ void Receta_UI::control(LDLCCED <Receta>& lista, UI_Ingredientes& sub)
         throw std::runtime_error("No se pudo abrir el archivo");
     }
 
-    lista.serializar(archivo);
+    lista.serialize(archivo, '@');
     archivo.close();
 }
 
@@ -400,7 +450,7 @@ void Receta_UI::cargar(LDLCCED <Receta>& lista)
 
     std::getline(archivo, str);
 
-    lista.deserializar(str);
+    lista.deserialize(str, '@');
 
     archivo.close();
-}*/
+}
