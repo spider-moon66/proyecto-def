@@ -10,16 +10,17 @@ std::string Receta::toString()
 }
 
 Receta::Receta(): 
-nombreReceta(""),
-descripcion(""),
-instrucciones(),
-ingredientesData(){}
+    ingredientesData(),
+      nombreReceta(),
+      descripcion(),
+      instrucciones(){}
 
 Receta::Receta(const Receta& other) : 
-nombreReceta(other.nombreReceta), 
-descripcion(other.descripcion), 
-instrucciones(other.instrucciones), 
-ingredientesData(other.ingredientesData)
+    ingredientesData(other.ingredientesData),
+      nombreReceta(other.nombreReceta),
+      descripcion(other.descripcion),
+      contadorINS(other.contadorINS),
+      instrucciones(other.instrucciones)
 {}
 
 Receta::Receta(std::string& n, std::string& d):
@@ -91,15 +92,14 @@ void Receta::serialize(std::ofstream& archivo, const char& delim)
 
 }
 
-void Receta::deserialize(const std::string& str, const char& delim)
+void Receta::deserialize(std::stringstream& str, const char& delim)
 {
-    std::stringstream myStr(str);
     std::string nombre;
     std::string desc;
 
-    std::getline(myStr, nombre, delim);
+    std::getline(str, nombre, delim);
 
-    std::getline(myStr, desc, delim);
+    std::getline(str, desc, delim);
 
     ingredientesData.deserialize(str, '|');
     instrucciones.deserialize(str, '#');
@@ -120,8 +120,8 @@ LDLCCED<typename Receta::Instruccion>& Receta::accesoInstrucciones()
 Receta::Instruccion::Instruccion() : predicado(""){}
 
 Receta::Instruccion::Instruccion(const std::string& t, const short int num):
-predicado(t),
-n_ins(num)
+n_ins(num),
+predicado(t)
 {}
 
 short int Receta::Instruccion::getNum() const{
@@ -141,7 +141,7 @@ void Receta::Instruccion::setPredicado(const std::string& t){
 }
 
 std::string Receta::Instruccion::toString(){
-    return std::to_string(n_ins) + ". " + predicado + "/n";
+    return std::to_string(n_ins) + ". " + predicado + "\n";
 }
 
 /*Se manda llamar solo cuando se inserta un elemento, 
@@ -172,12 +172,20 @@ void Receta::Instruccion::serialize(std::ofstream& archivo, const char& delim){
     archivo << predicado << delim;
 }
 
-void Receta::Instruccion::deserialize(const std::string& str, const char& delim){
-    std::stringstream myStr(str);
+void Receta::Instruccion::deserialize(std::stringstream& str, const char& delim){
+    
     std::string insSTR;
 
-    std::getline(myStr, insSTR, delim);
+    std::getline(str, insSTR, delim);
     this->n_ins = std::stoi(insSTR);
 
-    std:getline(myStr, this->predicado, delim);
+    std::getline(str, this->predicado, delim);
+}
+
+bool Receta::Instruccion::operator<(const Instruccion& a) const{
+    return this->getNum() < a.getNum();
+}
+
+bool Receta::Instruccion::operator<=(const Instruccion& a) const{
+    return this->getNum() <= a.getNum();
 }

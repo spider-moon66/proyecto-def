@@ -27,7 +27,9 @@ class Receta{
                 void setNum(const short int);
                 std::string toString();
                 void serialize(std::ofstream&, const char& delim = ';');
-                void deserialize(const std::string& str, const char& delim = ';');
+                void deserialize(std::stringstream& str, const char& delim = ';');
+                bool operator<=(const Instruccion&)const;
+                bool operator<(const Instruccion&)const;
             };
     private:
         Lista <Ingrediente> ingredientesData;
@@ -63,7 +65,7 @@ class Receta{
         bool operator>=(const Receta&) const;
         //Serializar/Deserializar
         void serialize(std::ofstream&, const char& delim = '*');
-        void deserialize(const std::string& str, const char& delim = '*');
+        void deserialize(std::stringstream& str, const char& delim = '*');
 };
 
 #endif // __RECETA_H__

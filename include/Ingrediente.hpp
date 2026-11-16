@@ -28,8 +28,8 @@ class Ingrediente{
         friend std::ostream& operator<<(std::ostream&, const Ingrediente&);
         std::string toString();
         bool validarCantidad();
-        void serializar(std::ofstream&, const char delim = '|');
-        void deserializar(const std::string& str, const char delim = '|');
+        void serialize(std::ofstream&, const char delim = '|');
+        void deserialize(std::stringstream& str, const char delim = '|');
         
 };
 

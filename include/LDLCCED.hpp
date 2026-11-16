@@ -4,6 +4,8 @@
 #include <functional>
 #include <exception>
 #include <string>
+#include <fstream>
+#include <sstream>
 
 template<class T>
 class LDLCCED{
@@ -48,7 +50,7 @@ class LDLCCED{
         Node* header;
 
         void copyAll(const LDLCCED<T>&);
-        bool isValidPos(Node*);
+        bool isValidPos(Node*) const;
 
     public:
 
@@ -90,8 +92,8 @@ class LDLCCED{
 
         void anular();
 
-        void serialize(std::ofstream&, const char& '#');
-        void deserialize(const std::string&, const char& '#');
+        void serialize(std::ofstream&, const char& = '#');
+        void deserialize(std::stringstream&, const char& = '#');
 };
 
 //Node
@@ -158,7 +160,7 @@ template<class T>
 void LDLCCED<T>::Node::setData(const T& e){
     //si el puntero a un dato T está vacio (nulo), se inicializa con una direccion a un elemento
     if(dataPtr == nullptr){
-        if(dataPtr = new T(e) == nullptr)
+        if((dataPtr = new T(e)) == nullptr)
         {
             throw Exception("Memoria no disponible, asignar dato");
         }
@@ -217,7 +219,7 @@ void LDLCCED<T>::copyAll(const LDLCCED<T>& other){
 }
 
 template<class T>
-bool LDLCCED<T>::isValidPos(Node* pos){
+bool LDLCCED<T>::isValidPos(Node* pos) const{
 
     Node* aux(header->getNextNode());
 
@@ -286,7 +288,7 @@ void LDLCCED<T>::ins(Node* pos, const T& e){
 }
 
 template<class T>
-void LDLCCED<class T>::insSorted(const T& e){
+void LDLCCED<T>::insSorted(const T& e){
     //si está vacia, no es necesario hacer la llamada recursiva
     if(isEmpty())
     {
@@ -303,7 +305,7 @@ void LDLCCED<class T>::insSorted(const T& e){
 
 //En el contexto del proyecto final, lo voy a utilizar de forma exclusiva para las instrucciones, puesto que no contemplo muchas y el costo por recorrer la lista es bajo
 template<class T> 
-void LDLCCED<class T>::insSorted(const T& e, Node* aux){
+void LDLCCED<T>::insSorted(const T& e, Node* aux){
 
     //criterio de paro: si el elemento es menor que el primer elemento, entonces es menor que todos
     if(e < aux->getData()){
@@ -320,7 +322,7 @@ void LDLCCED<class T>::insSorted(const T& e, Node* aux){
     /*Si el elemento es mayor o igual que el elemento dentro del siguiente nodo, entonces el lugar de inserción es 
     despues del auxiliar (siguiendo la lógica de inserción que implementé)*/
     if(e <= aux->getNextNode()->getData()){
-        ins(e, aux);
+        ins(aux, e);
         return;
     }else{
         insSorted(e, aux->getNextNode());
@@ -492,14 +494,16 @@ void LDLCCED<T>::serialize(std::ofstream& archivo, const char& delim){
     declarando explicitamente cuántos elementos tiene que reconstruir*/
     int i = 0;
 
-    Node* aux(header->getNextNode())
+    Node* aux(header->getNextNode());
 
     while(aux != header){
         i++;
         aux = aux->getNextNode();
     }
 
-    archivo << std::to_string(i);
+    archivo << std::to_string(i) << delim;
+
+    aux = header->getNextNode();
 
     while(aux != header){
         aux->getData().serialize(archivo, delim);
@@ -509,13 +513,12 @@ void LDLCCED<T>::serialize(std::ofstream& archivo, const char& delim){
 }
 
 template<class T>
-void LDLCCED<T>::deserialize(const std::string& str, const char& delim){
+void LDLCCED<T>::deserialize(std::stringstream& str, const char& delim){
     
-    std::stringstream myStr(str);
     std::string cantSTR;
     int cantINT;
 
-    std::getline(myStr, cantSTR, delim);
+    std::getline(str, cantSTR, delim);
 
     cantINT = std::stoi(cantSTR);
 
@@ -525,7 +528,7 @@ void LDLCCED<T>::deserialize(const std::string& str, const char& delim){
         //El nuevo objeto se construye por medio de la cadena que recibe su propio método para deserializar, después se inserta en la lista
         T nuevo;
 
-        nuevo.deserialize(myStr, delim);
+        nuevo.deserialize(str, delim);
 
         if(this->isEmpty()){
             this->insInicio(nuevo);

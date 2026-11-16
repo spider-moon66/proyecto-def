@@ -13,7 +13,7 @@ void Receta_UI::limpiarBuffer(){
 void Receta_UI::verInst(Receta& receta){
     LDLCCED<Receta::Instruccion>::Position pos(receta.accesoInstrucciones().getFirst());
 
-    while(pos->getNextNode() != receta.accesoInstrucciones().getLast()->getNextNode()){
+    while(pos != receta.accesoInstrucciones().getLast()->getNextNode()){
         std::cout << receta.accesoInstrucciones().retrieve(pos).toString() << "\n\n";
         pos = pos->getNextNode();
     }
@@ -47,6 +47,7 @@ void Receta_UI::modificarInstrucciones(Receta& receta)
     std::cout << "[R]egresar" << std::endl;
     do{
         std::cin >> op;
+        limpiarBuffer();
         op = toupper(op);
         if(op != 'A' && op != 'B' && op != 'E' && op != 'V' && op != 'R'){
             std::cout << "Seleccione una acción valida (M, B, A, R, V)" << std::endl;
@@ -59,7 +60,7 @@ void Receta_UI::modificarInstrucciones(Receta& receta)
             verInst(receta);
             break;
         }
-        case 'M':{
+        case 'E':{
             if(receta.accesoInstrucciones().isEmpty()){
                 std::cout << "No hay elementos para modificar" << std::endl;
                 return;
@@ -323,7 +324,6 @@ void Receta_UI::verReceta(LDLCCED <Receta>& lista, UI_Ingredientes& sub, LDLCCED
     std::cout << std::string(40, '-') << std::endl;
     std::cout << lista.retrieve(pos).toString();
     std::cout << std::endl;
-    sub.verIngredientes(lista.retrieve(pos).accesoIngredientes());
     std::cout << std::string(40, '-') << std::endl;
 }
 
@@ -450,7 +450,9 @@ void Receta_UI::cargar(LDLCCED <Receta>& lista)
 
     std::getline(archivo, str);
 
-    lista.deserialize(str, '@');
+    std::stringstream myStr(str);
+
+    lista.deserialize(myStr, '@');
 
     archivo.close();
 }

@@ -71,23 +71,22 @@ std::ostream& operator<<(std::ostream& stream, const Ingrediente& este)
 }
 
 std::string Ingrediente::toString(){
-    return nombreIngrediente + " " + std::to_string(cantidad) + " "  + unidad;
+    return nombreIngrediente + " " + std::to_string(cantidad) + " "  + unidad + "\n";
 }
 
-void Ingrediente::serializar(std::ofstream& archivo, const char delim)
+void Ingrediente::serialize(std::ofstream& archivo, const char delim)
 {
     archivo << this->nombreIngrediente << delim;
     archivo << this->cantidad << delim;
     archivo << this->unidad << delim;
 }
 
-void Ingrediente::deserializar(const std::string& str, const char delim)
+void Ingrediente::deserialize(std::stringstream& str, const char delim)
 {
-    std::stringstream myStr(str);
     std::string cantidadStr;
 
-    std::getline(myStr, this->nombreIngrediente, delim);
-    std::getline(myStr, cantidadStr, delim);
+    std::getline(str, this->nombreIngrediente, delim);
+    std::getline(str, cantidadStr, delim);
     this->cantidad = std::stof(cantidadStr);
-    std::getline(myStr, this->unidad, delim);
+    std::getline(str, this->unidad, delim);
 }

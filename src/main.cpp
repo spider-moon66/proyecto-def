@@ -14,5 +14,5 @@ int main()
 
     menu_recetas.control(Recetas, menu_Ingredientes);
 
-    EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }

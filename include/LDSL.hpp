@@ -70,8 +70,8 @@ class Lista{
 
         void anular();
 
-        void serialize(std::ofstream&, const char& '#');
-        void deserialize(const std::string&, const char& '#');
+        void serialize(std::ofstream&, const char& = '#');
+        void deserialize(std::stringstream& str, const char& = '#');
 };
 
 //Implementación de Node
@@ -350,7 +350,9 @@ void Lista<T>::serialize(std::ofstream& archivo, const char& delim){
         aux = aux->getNext();
     }
 
-    archivo << std::to_string(i);
+    archivo << std::to_string(i) << delim;
+
+    aux = anchor->getNext();
 
     while(aux != nullptr){
         aux->getData().serialize(archivo, delim);
@@ -360,15 +362,14 @@ void Lista<T>::serialize(std::ofstream& archivo, const char& delim){
 }
 
 template<class T>
-void Lista<T>::deserialize(const std::string& str, const char& delim){
+void Lista<T>::deserialize(std::stringstream& str, const char& delim){
     
-    std::stringstream myStr(str);
     std::string cantSTR;
     int cantINT;
 
     Node* aux(anchor);
 
-    std::getline(myStr, cantSTR, delim);
+    std::getline(str, cantSTR, delim);
 
     cantINT = std::stoi(cantSTR);
 
@@ -377,8 +378,14 @@ void Lista<T>::deserialize(const std::string& str, const char& delim){
     while(i < cantINT){
         //El nuevo objeto se construye por medio de la cadena que recibe su propio método para deserializar, después se inserta en la lista
         T nuevo;
-        nuevo.deserialize(myStr, delim);
-        this->ins(nuevo);
+        nuevo.deserialize(str, delim);
+        
+        if(aux == nullptr){
+            ins(nullptr, nuevo);
+        }else{
+            ins(aux, nuevo);
+        }
+        aux = aux->getNext();
         i++;
     }
 
