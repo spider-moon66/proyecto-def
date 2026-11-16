@@ -408,11 +408,11 @@ void Receta_UI::control(LDLCCED <Receta>& lista, UI_Ingredientes& sub)
                 break;
             }
             case 'G':{
-                //guardar(lista);
+                guardar(lista);
                 break;
             }
             case 'C':{
-                //cargar(lista);
+                cargar(lista);
                 break;
             }
             case 'O':{

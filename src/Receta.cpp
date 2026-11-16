@@ -87,19 +87,15 @@ void Receta::serialize(std::ofstream& archivo, const char& delim)
     ingredientesData.serialize(archivo, '|');
 
     instrucciones.serialize(archivo, '#');
-    
-    archivo << delim;
 
 }
 
 void Receta::deserialize(std::stringstream& str, const char& delim)
 {
-    std::string nombre;
-    std::string desc;
 
-    std::getline(str, nombre, delim);
+    std::getline(str, nombreReceta, delim);
 
-    std::getline(str, desc, delim);
+    std::getline(str, descripcion, delim);
 
     ingredientesData.deserialize(str, '|');
     instrucciones.deserialize(str, '#');
