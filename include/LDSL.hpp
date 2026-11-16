@@ -365,27 +365,16 @@ void Lista<T>::deserialize(std::stringstream& str, const char& delim){
     std::string cantSTR;
     int cantINT;
 
-    Node* aux(anchor);
-
     std::getline(str, cantSTR, delim);
 
     cantINT = std::stoi(cantSTR);
 
-    int i = 0;
-
-    while(i < cantINT){
-        //El nuevo objeto se construye por medio de la cadena que recibe su propio método para deserializar, después se inserta en la lista
+    Node* ultimo(getLast());
+    for(int i = 0; i < cantINT; i++){
         T nuevo;
         nuevo.deserialize(str, delim);
-        
-        if(aux == nullptr){
-            ins(nullptr, nuevo);
-            aux = anchor;
-        }else{
-            ins(aux, nuevo);
-        }
-        aux = aux->getNext();
-        i++;
+        ins(ultimo, nuevo);
+        ultimo = (ultimo == nullptr) ? anchor : ultimo->getNext();
     }
 
 }
