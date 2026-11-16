@@ -100,6 +100,8 @@ void Receta::deserialize(std::stringstream& str, const char& delim)
     ingredientesData.deserialize(str, '|');
     instrucciones.deserialize(str, '#');
 
+    contadorINS = instrucciones.isEmpty() ? 0 : instrucciones.getLast()->getData().getNum() + 1;
+
 }
 
 Lista<Ingrediente>& Receta::accesoIngredientes()
